@@ -6,8 +6,8 @@ Resources:
       - "RedditToSNSPolicy"
     Properties:
       Code:
-        S3Bucket: "mpietruszka-code"
-        S3Key: "bin/reddit_sns_lambda.zip"
+        S3Bucket: ""
+        S3Key: "reddit_sns_lambda.zip"
       FunctionName: "reddit_to_sns_l"
       Handler: "reddit_to_sns"
       MemorySize: 128
@@ -16,9 +16,9 @@ Resources:
       Timeout: 30
       VpcConfig:
         SecurityGroupIds:
-          - sg-f7413d8e
+          - sg-xxxxxxx
         SubnetIds:
-          - subnet-c1fb95a6
+          - subnet-xxxxxxx
 
   RedditToSNSRole:
     Type: "AWS::IAM::Role"
