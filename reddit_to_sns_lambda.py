@@ -4,6 +4,10 @@ Parse subreddits for new submissions matching the search string and then
 Send an AWS SNS message. This lambda function is best matched with a CloudWatch
 Event Rule trigger set to rate(1 hour).
 
+.. todo::
+   - Figure out if we can bypass feeding in Reddit API client_id/client_secret
+   - Write a bootstrapping script which will package praw4 for us
+
 .. moduleauthor:: Mike Pietruszka <mike@mpietruszka.com>
 '''
 
