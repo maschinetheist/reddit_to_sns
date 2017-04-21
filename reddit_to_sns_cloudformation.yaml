@@ -1,0 +1,110 @@
+Resources:
+  RedditToSNSLambda:
+    Type: "AWS::Lambda::Function"
+    DependsOn:
+      - "RedditToSNSRole"
+      - "RedditToSNSPolicy"
+    Properties:
+      Code:
+        S3Bucket: "mpietruszka-code"
+        S3Key: "bin/reddit_sns_lambda.zip"
+      FunctionName: "reddit_to_sns_l"
+      Handler: "reddit_to_sns"
+      MemorySize: 128
+      Role: !GetAtt RedditToSNSRole.Arn
+      Runtime: "python2.7"
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-f7413d8e
+        SubnetIds:
+          - subnet-c1fb95a6
+
+  RedditToSNSRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "reddit_to_sns_r2"
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect:  "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - sts:AssumeRole
+
+  RedditToSNSPolicy:
+    Type: "AWS::IAM::Policy"
+    DependsOn: "RedditToSNSRole"
+    Properties:
+      PolicyName: "reddit_to_sns_p"
+      Roles:
+        -
+          Ref: "RedditToSNSRole"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: "Allow"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: "arn:aws:logs:*:*:*"
+          -
+            Effect: "Allow"
+            Action: "sns:Publish"
+            Resource: "arn:aws:sns:*:*:*"
+          -
+            Effect: "Allow"
+            Action:
+              - "ec2:CreateNetworkInterface"
+              - "ec2:DeleteNetworkInterface"
+              - "ec2:DescribeNetworkInterfaces"
+            Resource: "*"
+          -
+            Effect: "Allow"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::*"
+
+  RootInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        -
+          Ref: "RedditToSNSRole"
+      InstanceProfileName: "RedditToSNSProfile"
+
+  CloudWatchEventRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: RedditSNSLambdaEventRule
+      Description: "Trigger rule to drive lambda function"
+      ScheduleExpression: "rate(1 hour)"
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !GetAtt RedditToSNSLambda.Arn
+          Id: "reddit_to_sns"
+
+  CloudWatchEventRulePermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Ref: "RedditToSNSLambda"
+      Action: "lambda:invokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt CloudWatchEventRule.Arn
+
+Outputs:
+  LambdaFunctionName:
+    Description: "Lambda Function Name"
+    Value: !GetAtt RedditToSNSLambda.Arn
+
+  LambdaFuncRoleName:
+    Description: "Lambda Function Role Name"
+    Value: !GetAtt RedditToSNSRole.Arn
