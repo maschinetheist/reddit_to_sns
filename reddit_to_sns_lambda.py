@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+'''
+Parse subreddits for new submissions matching the search string and then
+Send an AWS SNS message. This lambda function is best matched with a CloudWatch
+Event Rule trigger set to rate(1 hour).
+
+.. moduleauthor:: Mike Pietruszka <mike@mpietruszka.com>
+'''
 
 import boto3
 import praw
@@ -11,9 +18,7 @@ logger.setLevel(logging.INFO)
 
 def reddit_to_sns(event, context):
     '''
-    Parse subreddits for new submissions matching the search string and then
-    Send an AWS SNS message. This lambda function is best matched with a CloudWatch
-    Event Rule trigger set to rate(1 hour).
+    reddit_to_sns lambda function
 
     :param event:       pass lambda event parameter data that consists of:
                         - awsregion
